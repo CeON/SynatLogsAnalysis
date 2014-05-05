@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>pl.edu.icm.synatlogsanalysis</groupId>
+    <artifactId>synatlogsanalysis</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>synatlogsanalysis-workflow</artifactId>
+  <name>Synat logs analysis - workflow</name>
+  <packaging>oozie</packaging>
+  <url>http://maven.apache.org</url>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>pl.edu.icm.maven</groupId>
+        <artifactId>oozie-maven-plugin</artifactId>
+        <version>1.3-SNAPSHOT</version>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>pl.edu.icm.synatlogsanalysis</groupId>
+      <artifactId>synatlogsanalysis-impl</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>pl.edu.icm.coansys</groupId>
+      <artifactId>statistics-generator-workflow</artifactId>
+      <version>1.6-SNAPSHOT</version>
+      <classifier>oozie-wf</classifier>
+      <type>tar.gz</type>
+    </dependency>
+  </dependencies>
+</project>

@@ -1,0 +1,110 @@
+<workflow-app xmlns="uri:oozie:workflow:0.4" name="synat-logs-analysis">
+
+    <parameters>
+        <property>
+            <name>POOL_NAME</name>
+            <value>default</value>
+        </property>
+
+        <property>
+            <name>input_filter_names</name>
+            <value>serviceA;serviceB;evtC;evtD</value>
+        </property>
+        <property>
+            <name>input_filter_classes</name>
+            <value>EQFILTER;EQFILTER;EQFILTER;EQFILTER</value>
+        </property>
+        <property>
+            <name>input_filter_classes_args</name>
+            <value>serviceId#repositoryFacade;serviceId#publicationsMain;eventType#fetchContent;eventType#render</value>
+        </property>
+        <property>
+            <name>input_filter_formula</name>
+            <value>(serviceA and evtC) or (serviceB and evtD)</value>
+        </property>
+
+        <property>
+            <name>partitions_names</name>
+            <value>serviceId;eventType;resourceId;timestamp</value>
+        </property>
+        <property>
+            <name>partitions_classes</name>
+            <value>EQUALS;EQUALS;REGEX;DATERANGES</value>
+        </property>
+        <property>
+            <name>partitions_classes_args</name>
+            <value>;;/trunk-portal/(resource|thumbnail)/([^/]+)#2;14#timezone=Europe/Warsaw</value>
+        </property>
+
+        <property>
+            <name>statistics_names</name>
+            <value>COUNT</value>
+        </property>
+        <property>
+            <name>statistics_classes</name>
+            <value>COUNT</value>
+        </property>
+
+        <property>
+            <name>group_keys</name>
+            <value>serviceId;eventType;timestamp</value>
+        </property>
+        <property>
+            <name>sort_stat</name>
+            <value>COUNT</value>
+        </property>
+        <property>
+            <name>sort_order</name>
+            <value>DESC</value>
+        </property>
+        <property>
+            <name>limit</name>
+            <value>10</value>
+        </property>
+    </parameters>
+
+    <global>
+        <job-tracker>${jobTracker}</job-tracker>
+        <name-node>${nameNode}</name-node>
+        <configuration>
+            <property>
+                <name>mapred.fairscheduler.pool</name>
+                <value>${POOL_NAME}</value>
+            </property>
+            <property>
+                <name>oozie.launcher.mapred.fairscheduler.pool</name>
+                <value>${POOL_NAME}</value>
+            </property>
+            <property>
+                <name>mapred.job.queue.name</name>
+                <value>${queueName}</value>
+            </property>
+            <property>
+                <name>mapred.mapper.new-api</name>
+                <value>true</value>
+            </property>
+            <property>
+                <name>mapred.reducer.new-api</name>
+                <value>true</value>
+            </property>
+        </configuration>
+    </global>
+
+    <start to="logsanalysis" />
+
+    <action name="logsanalysis">
+        <sub-workflow>
+            <app-path>${wf:appPath()}/pl.edu.icm.coansys.statistics-generator-workflow</app-path>
+            <propagate-configuration />
+        </sub-workflow>
+        <ok to="end" />
+        <error to="fail" />
+    </action>
+
+    <kill name="fail">
+        <message>Workflow failed</message>
+    </kill>
+
+    <end name="end" />
+
+</workflow-app>
