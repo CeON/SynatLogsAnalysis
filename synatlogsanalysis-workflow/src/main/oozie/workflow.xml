@@ -7,6 +7,15 @@
         </property>
 
         <property>
+            <name>user_operations</name>
+            <value>SPECIALCOUNT</value>
+        </property>
+        <property>
+            <name>user_operations_classes</name>
+            <value>pl.edu.icm.synatlogsanalysis.SpecialCountSummary</value>
+        </property>
+
+        <property>
             <name>input_filter_names</name>
             <value>serviceA;serviceB;evtC;evtD</value>
         </property>
@@ -42,7 +51,7 @@
         </property>
         <property>
             <name>statistics_classes</name>
-            <value>COUNT</value>
+            <value>SPECIALCOUNT</value>
         </property>
 
         <property>
@@ -94,7 +103,7 @@
 
     <action name="logsanalysis">
         <sub-workflow>
-            <app-path>${wf:appPath()}/pl.edu.icm.coansys.statistics-generator-workflow</app-path>
+            <app-path>${wf:appPath()}/pl.edu.icm.coansys-statistics-generator-workflow</app-path>
             <propagate-configuration />
         </sub-workflow>
         <ok to="end" />
