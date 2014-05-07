@@ -99,12 +99,46 @@
         </configuration>
     </global>
 
-    <start to="logsanalysis" />
+    <start to="preparefs" />
+
+    <action name="preparefs">
+        <fs>
+            <delete path="${hdfsWorkingDirURI}" />
+            <mkdir path="${hdfsWorkingDirURI}" />
+        </fs>
+        <ok to="hbasetoseqfile" />
+        <error to="fail" />
+    </action>
+
+    <action name="hbasetoseqfile">
+        <pig>
+            <script>hbtofs.pig</script>
+            <param>synatLogsTable=${synatLogsTable}</param>
+            <param>synatLogsSeqFile=${hdfsWorkingDirURI}/input-data</param>
+            <param>commonJarsPath=${commonJarsPath}</param>
+        </pig>
+        <ok to="logsanalysis" />
+        <error to="fail" />
+    </action>
 
     <action name="logsanalysis">
         <sub-workflow>
             <app-path>${wf:appPath()}/pl.edu.icm.coansys-statistics-generator-workflow</app-path>
             <propagate-configuration />
+            <configuration>
+                <property>
+                    <name>hdfsDirInputData</name>
+                    <value>${hdfsWorkingDirURI}/input-data</value>
+                </property>
+                <property>
+                    <name>hdfsDirOutputData</name>
+                    <value>${hdfsDirOutputData}</value>
+                </property>
+                <property>
+                    <name>hdfsWorkingDirURI</name>
+                    <value>${hdfsWorkingDirURI}</value>
+                </property>
+            </configuration>
         </sub-workflow>
         <ok to="end" />
         <error to="fail" />
