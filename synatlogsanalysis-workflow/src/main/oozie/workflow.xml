@@ -6,70 +6,6 @@
             <value>default</value>
         </property>
 
-        <property>
-            <name>user_operations</name>
-            <value>SPECIALCOUNT</value>
-        </property>
-        <property>
-            <name>user_operations_classes</name>
-            <value>pl.edu.icm.synatlogsanalysis.SpecialCountSummary</value>
-        </property>
-
-        <property>
-            <name>input_filter_names</name>
-            <value>serviceA;serviceB;evtC;evtD</value>
-        </property>
-        <property>
-            <name>input_filter_classes</name>
-            <value>EQFILTER;EQFILTER;EQFILTER;EQFILTER</value>
-        </property>
-        <property>
-            <name>input_filter_classes_args</name>
-            <value>serviceId#repositoryFacade;serviceId#publicationsMain;eventType#fetchContent;eventType#render</value>
-        </property>
-        <property>
-            <name>input_filter_formula</name>
-            <value>(serviceA and evtC) or (serviceB and evtD)</value>
-        </property>
-
-        <property>
-            <name>partitions_names</name>
-            <value>serviceId;eventType;resourceId;timestamp</value>
-        </property>
-        <property>
-            <name>partitions_classes</name>
-            <value>EQUALS;EQUALS;REGEX;DATERANGES</value>
-        </property>
-        <property>
-            <name>partitions_classes_args</name>
-            <value>;;/trunk-portal/(resource|thumbnail)/([^/]+)#2;14#timezone=Europe/Warsaw</value>
-        </property>
-
-        <property>
-            <name>statistics_names</name>
-            <value>COUNT</value>
-        </property>
-        <property>
-            <name>statistics_classes</name>
-            <value>SPECIALCOUNT</value>
-        </property>
-
-        <property>
-            <name>group_keys</name>
-            <value>serviceId;eventType;timestamp</value>
-        </property>
-        <property>
-            <name>sort_stat</name>
-            <value>COUNT</value>
-        </property>
-        <property>
-            <name>sort_order</name>
-            <value>DESC</value>
-        </property>
-        <property>
-            <name>limit</name>
-            <value>10</value>
-        </property>
     </parameters>
 
     <global>
@@ -103,10 +39,9 @@
 
     <action name="preparefs">
         <fs>
-            <delete path="${unfilteredInput}" />
-            <delete path="${filteredInput}" />
-            <delete path="${allStatistics}" />
-            <delete path="${aggregatedStatistics}" />
+            <delete path="${tmpdir}" />
+            <delete path="${views_downloads}" />
+            <delete path="${most_popular}" />
         </fs>
         <ok to="hbasetoseqfile" />
         <error to="fail" />
@@ -116,36 +51,181 @@
         <pig>
             <script>hbtofs.pig</script>
             <param>synatLogsTable=${synatLogsTable}</param>
-            <param>synatLogsSeqFile=${unfilteredInput}</param>
+            <param>synatLogsSeqFile=${tmpdir}/unfilteredInput</param>
             <param>commonJarsPath=${commonJarsPath}</param>
         </pig>
-        <ok to="logsanalysis" />
+        <ok to="views_downloads" />
         <error to="fail" />
     </action>
 
-    <action name="logsanalysis">
+    <action name="views_downloads">
         <sub-workflow>
             <app-path>${wf:appPath()}/pl.edu.icm.coansys-statistics-generator-workflow</app-path>
             <propagate-configuration />
             <configuration>
+
+                <property>
+                    <name>filter_input_data</name>
+                    <value>true</value>
+                </property>
+                <property>
+                    <name>aggregate_statistics</name>
+                    <value>false</value>
+                </property>
+
                 <property>
                     <name>unfilteredInput</name>
-                    <value>${unfilteredInput}</value>
+                    <value>${tmpdir}/unfilteredInput</value>
                 </property>
                 <property>
                     <name>filteredInput</name>
-                    <value>${filteredInput}</value>
+                    <value>${tmpdir}/filteredInput</value>
                 </property>
                 <property>
                     <name>allStatistics</name>
-                    <value>${allStatistics}</value>
+                    <value>${views_downloads}</value>
+                </property>
+
+                <property>
+                    <name>user_operations</name>
+                    <value>SPECIALCOUNT</value>
+                </property>
+                <property>
+                    <name>user_operations_classes</name>
+                    <value>pl.edu.icm.synatlogsanalysis.SpecialCountSummary</value>
+                </property>
+        
+                <property>
+                    <name>input_filter_names</name>
+                    <value>serviceA;serviceB;evtC;evtD</value>
+                </property>
+                <property>
+                    <name>input_filter_classes</name>
+                    <value>EQFILTER;EQFILTER;EQFILTER;EQFILTER</value>
+                </property>
+                <property>
+                    <name>input_filter_classes_args</name>
+                    <value>serviceId#repositoryFacade;serviceId#publicationsMain;eventType#fetchContent;eventType#render</value>
+                </property>
+                <property>
+                    <name>input_filter_formula</name>
+                    <value>(serviceA and evtC) or (serviceB and evtD)</value>
+                </property>
+        
+                <property>
+                    <name>partitions_names</name>
+                    <value>serviceId;eventType;resourceId;timestamp</value>
+                </property>
+                <property>
+                    <name>partitions_classes</name>
+                    <value>EQUALS;EQUALS;REGEX;DATERANGES</value>
+                </property>
+                <property>
+                    <name>partitions_classes_args</name>
+                    <value>;;/trunk-portal/(resource|thumbnail)/([^/]+)#2;14#timezone=Europe/Warsaw</value>
+                </property>
+        
+                <property>
+                    <name>statistics_names</name>
+                    <value>COUNT</value>
+                </property>
+                <property>
+                    <name>statistics_classes</name>
+                    <value>SPECIALCOUNT</value>
+                </property>
+        
+            </configuration>
+        </sub-workflow>
+        <ok to="most_popular" />
+        <error to="fail" />
+    </action>
+
+    <action name="most_popular">
+        <sub-workflow>
+            <app-path>${wf:appPath()}/pl.edu.icm.coansys-statistics-generator-workflow</app-path>
+            <propagate-configuration />
+            <configuration>
+
+                <property>
+                    <name>filter_input_data</name>
+                    <value>false</value>
+                </property>
+                <property>
+                    <name>aggregate_statistics</name>
+                    <value>true</value>
+                </property>
+
+                <property>
+                    <name>filteredInput</name>
+                    <value>${tmpdir}/filteredInput</value>
+                </property>
+                <property>
+                    <name>allStatistics</name>
+                    <value>${tmpdir}/operations_ensemble</value>
                 </property>
                 <property>
                     <name>aggregatedStatistics</name>
-                    <value>${aggregatedStatistics}</value>
+                    <value>${most_popular}</value>
                 </property>
+
+                <property>
+                    <name>user_operations</name>
+                    <value>SPECIALCOUNT</value>
+                </property>
+                <property>
+                    <name>user_operations_classes</name>
+                    <value>pl.edu.icm.synatlogsanalysis.SpecialCountSummary</value>
+                </property>
+        
+                <property>
+                    <name>partitions_names</name>
+                    <value>resourceId;timestamp</value>
+                </property>
+                <property>
+                    <name>partitions_classes</name>
+                    <value>REGEX;DATERANGES</value>
+                </property>
+                <property>
+                    <name>partitions_classes_args</name>
+                    <value>/trunk-portal/(resource|thumbnail)/([^/]+)#2;14#timezone=Europe/Warsaw</value>
+                </property>
+        
+                <property>
+                    <name>statistics_names</name>
+                    <value>COUNT</value>
+                </property>
+                <property>
+                    <name>statistics_classes</name>
+                    <value>SPECIALCOUNT</value>
+                </property>
+        
+                <property>
+                    <name>group_keys</name>
+                    <value>timestamp</value>
+                </property>
+                <property>
+                    <name>sort_stat</name>
+                    <value>COUNT</value>
+                </property>
+                <property>
+                    <name>sort_order</name>
+                    <value>DESC</value>
+                </property>
+                <property>
+                    <name>limit</name>
+                    <value>10</value>
+                </property>
+
             </configuration>
         </sub-workflow>
+        <ok to="cleanfs" />
+        <error to="fail" />
+    </action>
+
+    <action name="cleanfs">
+        <fs>
+            <delete path="${tmpdir}" />
+        </fs>
         <ok to="end" />
         <error to="fail" />
     </action>
