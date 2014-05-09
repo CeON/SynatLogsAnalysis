@@ -103,8 +103,10 @@
 
     <action name="preparefs">
         <fs>
-            <delete path="${hdfsWorkingDirURI}" />
-            <mkdir path="${hdfsWorkingDirURI}" />
+            <delete path="${unfilteredInput}" />
+            <delete path="${filteredInput}" />
+            <delete path="${allStatistics}" />
+            <delete path="${aggregatedStatistics}" />
         </fs>
         <ok to="hbasetoseqfile" />
         <error to="fail" />
@@ -114,7 +116,7 @@
         <pig>
             <script>hbtofs.pig</script>
             <param>synatLogsTable=${synatLogsTable}</param>
-            <param>synatLogsSeqFile=${hdfsWorkingDirURI}/input-data</param>
+            <param>synatLogsSeqFile=${unfilteredInput}</param>
             <param>commonJarsPath=${commonJarsPath}</param>
         </pig>
         <ok to="logsanalysis" />
@@ -127,16 +129,20 @@
             <propagate-configuration />
             <configuration>
                 <property>
-                    <name>hdfsDirInputData</name>
-                    <value>${hdfsWorkingDirURI}/input-data</value>
+                    <name>unfilteredInput</name>
+                    <value>${unfilteredInput}</value>
                 </property>
                 <property>
-                    <name>hdfsDirOutputData</name>
-                    <value>${hdfsDirOutputData}</value>
+                    <name>filteredInput</name>
+                    <value>${filteredInput}</value>
                 </property>
                 <property>
-                    <name>hdfsWorkingDirURI</name>
-                    <value>${hdfsWorkingDirURI}</value>
+                    <name>allStatistics</name>
+                    <value>${allStatistics}</value>
+                </property>
+                <property>
+                    <name>aggregatedStatistics</name>
+                    <value>${aggregatedStatistics}</value>
                 </property>
             </configuration>
         </sub-workflow>
