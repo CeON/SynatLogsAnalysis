@@ -40,8 +40,6 @@
     <action name="preparefs">
         <fs>
             <delete path="${tmpdir}" />
-            <delete path="${views_downloads}" />
-            <delete path="${most_popular}" />
         </fs>
         <ok to="hbasetoseqfile" />
         <error to="fail" />
@@ -50,8 +48,8 @@
     <action name="hbasetoseqfile">
         <pig>
             <script>hbtofs.pig</script>
-            <param>synatLogsTable=${synatLogsTable}</param>
-            <param>synatLogsSeqFile=${tmpdir}/unfilteredInput</param>
+            <param>synatLogsTable=${logs_table}</param>
+            <param>synatLogsSeqFile=${tmpdir}/all_logs</param>
             <param>commonJarsPath=${commonJarsPath}</param>
         </pig>
         <ok to="views_downloads" />
@@ -75,15 +73,15 @@
 
                 <property>
                     <name>unfilteredInput</name>
-                    <value>${tmpdir}/unfilteredInput</value>
+                    <value>${tmpdir}/all_logs</value>
                 </property>
                 <property>
                     <name>filteredInput</name>
-                    <value>${tmpdir}/filteredInput</value>
+                    <value>${tmpdir}/views_downloads_logs</value>
                 </property>
                 <property>
                     <name>allStatistics</name>
-                    <value>${views_downloads}</value>
+                    <value>${tmpdir}/views_downloads_stats</value>
                 </property>
 
                 <property>
@@ -97,32 +95,32 @@
         
                 <property>
                     <name>input_filter_names</name>
-                    <value>serviceA;serviceB;evtC;evtD</value>
+                    <value>serviceA;serviceB;bot1;bot2;bot3;bot4;bot5;bot6;eljournal</value>
                 </property>
                 <property>
                     <name>input_filter_classes</name>
-                    <value>EQFILTER;EQFILTER;EQFILTER;EQFILTER</value>
+                    <value>EQFILTER;EQFILTER;CONTAINSFILTER;CONTAINSFILTER;CONTAINSFILTER;CONTAINSFILTER;CONTAINSFILTER;CONTAINSFILTER;TWOFIELDSEQFILTER</value>
                 </property>
                 <property>
                     <name>input_filter_classes_args</name>
-                    <value>serviceId#repositoryFacade;serviceId#publicationsMain;eventType#fetchContent;eventType#render</value>
+                    <value>serviceId#resourceView;serviceId#resourceDownload;userAgent#AhrefsBot;userAgent#Baiduspider;userAgent#Googlebot;userAgent#MJ12bot;userAgent#bingbot;userAgent#spbot;elementId#journalId</value>
                 </property>
                 <property>
                     <name>input_filter_formula</name>
-                    <value>(serviceA and evtC) or (serviceB and evtD)</value>
+                    <value>(serviceA or serviceB) and not (bot1 or bot2 or bot3 or bot4 or bot5 or bot6) and not eljournal</value>
                 </property>
         
                 <property>
                     <name>partitions_names</name>
-                    <value>serviceId;eventType;resourceId;timestamp</value>
+                    <value>serviceId;elementId;timestamp</value>
                 </property>
                 <property>
                     <name>partitions_classes</name>
-                    <value>EQUALS;EQUALS;REGEX;DATERANGES</value>
+                    <value>EQUALS;EQUALS;DATERANGES</value>
                 </property>
                 <property>
                     <name>partitions_classes_args</name>
-                    <value>;;/trunk-portal/(resource|thumbnail)/([^/]+)#2;14#timezone=Europe/Warsaw</value>
+                    <value>;;14#timezone=Europe/Warsaw</value>
                 </property>
         
                 <property>
@@ -157,15 +155,15 @@
 
                 <property>
                     <name>filteredInput</name>
-                    <value>${tmpdir}/filteredInput</value>
+                    <value>${tmpdir}/views_downloads_logs</value>
                 </property>
                 <property>
                     <name>allStatistics</name>
-                    <value>${tmpdir}/operations_ensemble</value>
+                    <value>${tmpdir}/operations_stats</value>
                 </property>
                 <property>
                     <name>aggregatedStatistics</name>
-                    <value>${most_popular}</value>
+                    <value>${tmpdir}/most_popular_publications</value>
                 </property>
 
                 <property>
@@ -179,15 +177,15 @@
         
                 <property>
                     <name>partitions_names</name>
-                    <value>resourceId;timestamp</value>
+                    <value>elementId;timestamp</value>
                 </property>
                 <property>
                     <name>partitions_classes</name>
-                    <value>REGEX;DATERANGES</value>
+                    <value>EQUALS;DATERANGES</value>
                 </property>
                 <property>
                     <name>partitions_classes_args</name>
-                    <value>/trunk-portal/(resource|thumbnail)/([^/]+)#2;14#timezone=Europe/Warsaw</value>
+                    <value>;14#timezone=Europe/Warsaw</value>
                 </property>
         
                 <property>
@@ -218,6 +216,256 @@
 
             </configuration>
         </sub-workflow>
+        <ok to="books" />
+        <error to="fail" />
+    </action>
+
+    <action name="books">
+        <sub-workflow>
+            <app-path>${wf:appPath()}/pl.edu.icm.coansys-statistics-generator-workflow</app-path>
+            <propagate-configuration />
+            <configuration>
+
+                <property>
+                    <name>filter_input_data</name>
+                    <value>true</value>
+                </property>
+                <property>
+                    <name>aggregate_statistics</name>
+                    <value>true</value>
+                </property>
+
+                <property>
+                    <name>unfilteredInput</name>
+                    <value>${tmpdir}/views_downloads_logs</value>
+                </property>
+                <property>
+                    <name>filteredInput</name>
+                    <value>${tmpdir}/books_logs</value>
+                </property>
+                <property>
+                    <name>allStatistics</name>
+                    <value>${tmpdir}/books_stats</value>
+                </property>
+                <property>
+                    <name>aggregatedStatistics</name>
+                    <value>${tmpdir}/most_popular_books</value>
+                </property>
+
+                <property>
+                    <name>user_operations</name>
+                    <value>SPECIALCOUNT</value>
+                </property>
+                <property>
+                    <name>user_operations_classes</name>
+                    <value>pl.edu.icm.synatlogsanalysis.SpecialCountSummary</value>
+                </property>
+
+                <property>
+                    <name>input_filter_names</name>
+                    <value>book</value>
+                </property>
+                <property>
+                    <name>input_filter_classes</name>
+                    <value>NONEMPTYFILTER</value>
+                </property>
+                <property>
+                    <name>input_filter_classes_args</name>
+                    <value>bookId</value>
+                </property>
+                <property>
+                    <name>input_filter_formula</name>
+                    <value>book</value>
+                </property>
+        
+                <property>
+                    <name>partitions_names</name>
+                    <value>bookId;timestamp</value>
+                </property>
+                <property>
+                    <name>partitions_classes</name>
+                    <value>EQUALS;DATERANGES</value>
+                </property>
+                <property>
+                    <name>partitions_classes_args</name>
+                    <value>;14#timezone=Europe/Warsaw</value>
+                </property>
+        
+                <property>
+                    <name>statistics_names</name>
+                    <value>COUNT</value>
+                </property>
+                <property>
+                    <name>statistics_classes</name>
+                    <value>SPECIALCOUNT</value>
+                </property>
+        
+                <property>
+                    <name>group_keys</name>
+                    <value>timestamp</value>
+                </property>
+                <property>
+                    <name>sort_stat</name>
+                    <value>COUNT</value>
+                </property>
+                <property>
+                    <name>sort_order</name>
+                    <value>DESC</value>
+                </property>
+                <property>
+                    <name>limit</name>
+                    <value>10</value>
+                </property>
+
+            </configuration>
+        </sub-workflow>
+        <ok to="journals" />
+        <error to="fail" />
+    </action>
+
+    <action name="journals">
+        <sub-workflow>
+            <app-path>${wf:appPath()}/pl.edu.icm.coansys-statistics-generator-workflow</app-path>
+            <propagate-configuration />
+            <configuration>
+
+                <property>
+                    <name>filter_input_data</name>
+                    <value>true</value>
+                </property>
+                <property>
+                    <name>aggregate_statistics</name>
+                    <value>true</value>
+                </property>
+
+                <property>
+                    <name>unfilteredInput</name>
+                    <value>${tmpdir}/views_downloads_logs</value>
+                </property>
+                <property>
+                    <name>filteredInput</name>
+                    <value>${tmpdir}/journals_logs</value>
+                </property>
+                <property>
+                    <name>allStatistics</name>
+                    <value>${tmpdir}/journals_stats</value>
+                </property>
+                <property>
+                    <name>aggregatedStatistics</name>
+                    <value>${tmpdir}/most_popular_journals</value>
+                </property>
+
+                <property>
+                    <name>user_operations</name>
+                    <value>SPECIALCOUNT</value>
+                </property>
+                <property>
+                    <name>user_operations_classes</name>
+                    <value>pl.edu.icm.synatlogsanalysis.SpecialCountSummary</value>
+                </property>
+
+                <property>
+                    <name>input_filter_names</name>
+                    <value>journal</value>
+                </property>
+                <property>
+                    <name>input_filter_classes</name>
+                    <value>NONEMPTYFILTER</value>
+                </property>
+                <property>
+                    <name>input_filter_classes_args</name>
+                    <value>journalId</value>
+                </property>
+                <property>
+                    <name>input_filter_formula</name>
+                    <value>journal</value>
+                </property>
+        
+                <property>
+                    <name>partitions_names</name>
+                    <value>journalId;timestamp</value>
+                </property>
+                <property>
+                    <name>partitions_classes</name>
+                    <value>EQUALS;DATERANGES</value>
+                </property>
+                <property>
+                    <name>partitions_classes_args</name>
+                    <value>;14#timezone=Europe/Warsaw</value>
+                </property>
+        
+                <property>
+                    <name>statistics_names</name>
+                    <value>COUNT</value>
+                </property>
+                <property>
+                    <name>statistics_classes</name>
+                    <value>SPECIALCOUNT</value>
+                </property>
+        
+                <property>
+                    <name>group_keys</name>
+                    <value>timestamp</value>
+                </property>
+                <property>
+                    <name>sort_stat</name>
+                    <value>COUNT</value>
+                </property>
+                <property>
+                    <name>sort_order</name>
+                    <value>DESC</value>
+                </property>
+                <property>
+                    <name>limit</name>
+                    <value>10</value>
+                </property>
+
+            </configuration>
+        </sub-workflow>
+        <ok to="views_downloads_to_hbase" />
+        <error to="fail" />
+    </action>
+
+    <action name="views_downloads_to_hbase">
+        <pig>
+            <script>fstohb.pig</script>
+            <param>sequenceFile=${tmpdir}/views_downloads_stats</param>
+            <param>hbaseTable=${views_downloads_table}</param>
+            <param>commonJarsPath=${commonJarsPath}</param>
+        </pig>
+        <ok to="most_popular_publications_to_hbase" />
+        <error to="fail" />
+    </action>
+
+    <action name="most_popular_publications_to_hbase">
+        <pig>
+            <script>fstohb.pig</script>
+            <param>sequenceFile=${tmpdir}/most_popular_publications</param>
+            <param>hbaseTable=${most_popular_publications_table}</param>
+            <param>commonJarsPath=${commonJarsPath}</param>
+        </pig>
+        <ok to="most_popular_journals_to_hbase" />
+        <error to="fail" />
+    </action>
+
+    <action name="most_popular_journals_to_hbase">
+        <pig>
+            <script>fstohb.pig</script>
+            <param>sequenceFile=${tmpdir}/most_popular_journals</param>
+            <param>hbaseTable=${most_popular_journals_table}</param>
+            <param>commonJarsPath=${commonJarsPath}</param>
+        </pig>
+        <ok to="most_popular_books_to_hbase" />
+        <error to="fail" />
+    </action>
+
+    <action name="most_popular_books_to_hbase">
+        <pig>
+            <script>fstohb.pig</script>
+            <param>sequenceFile=${tmpdir}/most_popular_books</param>
+            <param>hbaseTable=${most_popular_books_table}</param>
+            <param>commonJarsPath=${commonJarsPath}</param>
+        </pig>
         <ok to="cleanfs" />
         <error to="fail" />
     </action>
