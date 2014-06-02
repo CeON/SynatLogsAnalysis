@@ -16,6 +16,7 @@
 -- -----------------------------------------------------
 -- -----------------------------------------------------
 REGISTER /usr/lib/hbase/lib/zookeeper.jar
+REGISTER /usr/lib/hbase/hbase.jar
 REGISTER /usr/lib/hbase/hbase-*-cdh4.*-security.jar
 REGISTER /usr/lib/hbase/lib/guava-11.0.2.jar
 
@@ -55,4 +56,4 @@ set dfs.client.socket-timeout 60000
 
 LG = LOAD '$sequenceFile' USING pl.edu.icm.coansys.commons.pig.udf.RichSequenceFileLoader('org.apache.hadoop.io.Text', 'org.apache.hadoop.io.BytesWritable');
 
-STORE LG INTO 'hbase://$hbaseTable' USING org.apache.pig.backend.hadoop.hbase.HBaseStorage('c:cproto');
+STORE LG INTO '$hbaseTable' USING org.apache.pig.backend.hadoop.hbase.HBaseStorage('c:cproto');

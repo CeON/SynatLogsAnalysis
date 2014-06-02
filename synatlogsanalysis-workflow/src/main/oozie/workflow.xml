@@ -422,6 +422,21 @@
 
             </configuration>
         </sub-workflow>
+        <ok to="prepare_tables" />
+        <error to="fail" />
+    </action>
+    
+    <action name="prepare_tables">
+        <shell xmlns="uri:oozie:shell-action:0.1">
+            <job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <exec>PREPARE_HBASE_TABLES.sh</exec>
+            <argument>${views_downloads_table}</argument>
+            <argument>${most_popular_publications_table}</argument>
+            <argument>${most_popular_journals_table}</argument>
+            <argument>${most_popular_books_table}</argument>
+            <file>scripts/PREPARE_HBASE_TABLES.sh#PREPARE_HBASE_TABLES.sh</file>
+        </shell>
         <ok to="views_downloads_to_hbase" />
         <error to="fail" />
     </action>
