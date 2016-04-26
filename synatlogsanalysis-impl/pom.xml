@@ -47,13 +47,7 @@
     <dependency>
       <groupId>pl.edu.icm.coansys</groupId>
       <artifactId>statistics-generator-impl</artifactId>
-      <version>1.6-SNAPSHOT</version>
-      <type>jar</type>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-common</artifactId>
-      <version>2.0.0-cdh4.3.0</version>
+      <version>1.9</version>
       <type>jar</type>
     </dependency>
   </dependencies>
