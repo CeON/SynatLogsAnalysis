@@ -18,6 +18,7 @@
 REGISTER /usr/lib/hbase/lib/zookeeper.jar
 REGISTER /usr/lib/hbase/hbase-client.jar
 REGISTER /usr/lib/hbase/hbase-common.jar
+REGISTER /usr/lib/hbase/hbase-server.jar
 REGISTER /usr/lib/hbase/lib/guava-*.jar
 
 REGISTER '$commonJarsPath'
