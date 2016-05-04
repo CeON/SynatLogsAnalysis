@@ -47,7 +47,7 @@
     <dependency>
       <groupId>pl.edu.icm.coansys</groupId>
       <artifactId>statistics-generator-impl</artifactId>
-      <version>1.9</version>
+      <version>1.10-rc3-SNAPSHOT</version>
       <type>jar</type>
     </dependency>
   </dependencies>
